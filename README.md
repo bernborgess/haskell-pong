@@ -30,7 +30,7 @@ This project draws inspiration from the [TP1: Pong project description](https://
 Clone the repository and navigate into the project directory:
 
 ```
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/haskell-pong.git
+git clone https://github.com/bernborgess/haskell-pong.git
 cd haskell-pong
 ```
 
