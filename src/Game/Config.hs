@@ -15,8 +15,8 @@ windowTitle = pack "Window"
 
 -- | Initial screen dimensions in pixels
 screenWidth, screenHeight :: CInt
-screenWidth = 800
-screenHeight = 600
+screenWidth = 1024
+screenHeight = 500
 
 {- | Window configuration specifying:
 - Centered initial position
