@@ -18,7 +18,7 @@ import Foreign.C.Types (CInt)
 import Game.InitSDL (initSDL)
 import Game.StateManagement (
     GameData (..),
-    GameState (),
+    GameState (gameDraws),
     exitClean,
     initialGameState,
  )
@@ -72,17 +72,14 @@ generateOutput gameData = do
     SDL.rendererDrawColor renderer SDL.$= colorEerieBlack
     SDL.clear renderer
 
-    -- drawables <- gets gameDrawables
-    -- forM_ drawables $ \d -> case d of
-    --     (DrawableBall b) -> do
-    --         return ()
-
+    drawables <- gets gameDraws
+    forM_ drawables $ \d -> d gameData
     -- ? Test: Just draw a square
 
-    let colorHoneyDew = SDL.V4 250 255 250 255
-    SDL.rendererDrawColor renderer SDL.$= colorHoneyDew
-    let square = SDL.Rectangle (SDL.P (SDL.V2 0 0)) (SDL.V2 100 100) :: SDL.Rectangle CInt
-    SDL.fillRect renderer (Just square)
+    -- let colorHoneyDew = SDL.V4 250 255 250 255
+    -- SDL.rendererDrawColor renderer SDL.$= colorHoneyDew
+    -- let square = SDL.Rectangle (SDL.P (SDL.V2 0 0)) (SDL.V2 100 100) :: SDL.Rectangle CInt
+    -- SDL.fillRect renderer (Just square)
 
     SDL.present renderer
     SDL.delay 16

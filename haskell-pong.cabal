@@ -19,6 +19,8 @@ library
                       Game.InitSDL
                       Game.StateManagement
                       Game.Config
+                      Actors.Ball
+                      Actors.Paddle
 
     build-depends:    base ^>=4.17.2.1,
                       sdl2 ^>=2.5.5.0,
