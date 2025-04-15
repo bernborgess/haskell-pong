@@ -1,3 +1,6 @@
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE InstanceSigs #-}
+
 module Game.StateManagement (
     GameData (..),
     GameState (..),
@@ -10,10 +13,17 @@ where
 
 import Control.Exception (SomeException, catch)
 import Control.Monad.State (StateT, forM_, gets, liftIO, modify)
+import Data.Word (Word32)
 import System.Exit (exitFailure, exitSuccess)
 import System.IO (hPrint, hPutStrLn, stderr)
 
 import qualified SDL
+
+import Actor (Actor (..))
+import Actor.Ball (Ball, createBall)
+import Drawable (Drawable (..))
+
+-- import Component.DrawComponent (Drawable(..))
 
 -- | Constant values to setup the game
 data GameData = GameData
@@ -21,12 +31,37 @@ data GameData = GameData
     , gameRenderer :: SDL.Renderer
     }
 
+-- TODO: Move this OUT!
+-- class DrawableC d where
+--     draw :: d -> SDL.Renderer -> StateT GameState IO ()
+
+-- data Drawable = forall d. (DrawableC d) => Drawable d
+
+-- instance DrawableC Drawable where
+--     draw :: Drawable -> SDL.Renderer -> StateT GameState IO ()
+--     draw (Drawable d) = draw d
+
+-- ! OVER TODO: Move this OUT!
+
 -- | Mutable values that run the game
 data GameState = GameState
-    {gameActions :: [IO ()]}
+    { gameActions :: [IO ()]
+    , gameActors :: [Actor]
+    , gameDrawables :: [Drawable]
+    , gameTicksCount :: Word32
+    --   , gamePaddle :: Paddle
+    --   gameBall :: Ball
+    }
 
 initialGameState :: GameState
-initialGameState = GameState{gameActions = []}
+initialGameState =
+    GameState
+        { gameActions = []
+        , gameActors = [ActorBall $ createBall (0, 0) (1, 1)]
+        , gameTicksCount = 0
+        , gameDrawables = [DrawableBall $ createBall (0, 0) (1, 1)]
+        -- , gameBall = createBall (0, 0) (1, 1)
+        }
 
 exitClean :: StateT GameState IO ()
 exitClean = do

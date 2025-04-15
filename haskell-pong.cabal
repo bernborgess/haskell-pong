@@ -19,6 +19,13 @@ library
                       Game.InitSDL
                       Game.StateManagement
                       Game.Config
+                      Actor
+                      Actor.Ball
+                      Actor.Paddle
+                      Drawable
+                    --   TODO: Fix this
+                    --   Component
+                    --   Component.DrawComponent
 
     build-depends:    base ^>=4.17.2.1,
                       sdl2 ^>=2.5.5.0,
