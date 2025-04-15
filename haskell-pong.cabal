@@ -1,20 +1,35 @@
 cabal-version:      3.0
 name:               haskell-pong
 version:            0.1.0.0
--- synopsis:
--- description:
 license:            MIT
 license-file:       LICENSE
 author:             bernborgess
 maintainer:         bernborgess@outlook.com
--- copyright:
 category:           Game
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
--- extra-source-files:
 
 common warnings
     ghc-options: -Wall
+
+library
+    import:           warnings
+    exposed-modules:  Game
+    other-modules:
+                      Game.InitSDL
+                      Game.StateManagement
+                      Game.Config
+
+    build-depends:    base ^>=4.17.2.1,
+                      sdl2 ^>=2.5.5.0,
+                      linear,
+                      text^>=1.2.5.0,
+                      mtl ^>= 2.2.2,
+                      random ^>= 1.2.1.1
+
+    hs-source-dirs:   src
+
+    default-language: Haskell2010
 
 executable haskell-pong
     import:           warnings
@@ -24,18 +39,7 @@ executable haskell-pong
                       sdl2 ^>=2.5.5.0,
                       linear,
                       text^>=1.2.5.0,
-                      sdl2-ttf ^>=2.1.3,
-                      sdl2-image ^>=2.1.0.0,
-                      sdl2-mixer ^>=1.2.0.0,
                       mtl ^>= 2.2.2,
-                      random ^>= 1.2.1.1
-    other-modules:
-                      Game
-                      Math
-                      Components.Component
-                      Components.DrawComponent
-                      Actors.Actor
-                      Actors.Ball
-                      Actors.Paddle
-    hs-source-dirs:   src
+                      random ^>= 1.2.1.1,
+                      haskell-pong
     default-language: Haskell2010

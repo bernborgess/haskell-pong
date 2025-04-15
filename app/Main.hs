@@ -1,9 +1,16 @@
 module Main where
 
-import Game (runGame)
-import Math (add)
+import Control.Monad.State (evalStateT)
+
+import Game (
+    exitClean,
+    gameLoop,
+    initSDL,
+    initialGameState,
+ )
 
 main :: IO ()
-main = do
-  runGame []
-  print (add 3 3)
+main = flip evalStateT initialGameState $ do
+    gameData <- initSDL
+    gameLoop gameData
+    exitClean
