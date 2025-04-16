@@ -14,4 +14,5 @@ data Paddle = Paddle
     { paddlePosition :: SDL.V2 CInt
     , paddleSize :: SDL.V2 CInt
     , paddleColor :: SDL.V4 Word8
+    , paddleDirection :: CInt
     }

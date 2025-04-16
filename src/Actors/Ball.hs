@@ -1,4 +1,4 @@
-module Actors.Ball (ballDraw) where
+module Actors.Ball (newBall, ballDraw) where
 
 import Control.Monad.State (StateT, gets)
 
@@ -6,6 +6,14 @@ import qualified SDL
 
 import Actors.Types (Ball (..))
 import Game.State (GameData (..), GameState (..))
+
+newBall :: Ball
+newBall =
+    Ball
+        { ballPosition = SDL.V2 100 0
+        , ballSize = SDL.V2 15 15
+        , ballColor = SDL.V4 250 255 250 255 -- HoneyDew #F0FFF0
+        }
 
 ballDraw :: GameData -> StateT GameState IO ()
 ballDraw gd = do

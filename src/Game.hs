@@ -24,7 +24,7 @@ import Game.State (
 gameLoop :: GameData -> StateT GameState IO ()
 gameLoop gameData = do
     processInput gameData
-    updateGame
+    updateGame gameData
     generateOutput gameData
     gameLoop gameData
 
@@ -34,7 +34,12 @@ gameLoop gameData = do
  - Window close: Clean exit
 -}
 processInput :: GameData -> StateT GameState IO ()
-processInput gameData = SDL.pollEvents >>= traverse_ handleSingleEvent
+processInput gameData = do
+    -- Game Events
+    SDL.pollEvents >>= traverse_ handleSingleEvent
+    -- Pass keyboard state to process input of actors
+    ks <- SDL.getKeyboardState
+    gets gameProcessInputs >>= traverse_ ($ ks)
   where
     handleSingleEvent :: SDL.Event -> StateT GameState IO ()
     handleSingleEvent event = case SDL.eventPayload event of
@@ -58,8 +63,8 @@ processInput gameData = SDL.pollEvents >>= traverse_ handleSingleEvent
     handleEscape :: StateT GameState IO ()
     handleEscape = exitClean
 
-updateGame :: StateT GameState IO ()
-updateGame = do
+updateGame :: GameData -> StateT GameState IO ()
+updateGame gameData = do
     -- Wait for enough ticks
     waitForTicks
 
@@ -72,7 +77,7 @@ updateGame = do
     put gs{gameTicks = currentTicks}
 
     -- Runs updates of all Actors with deltaTime
-    updateActors deltaTime
+    updateActors gameData deltaTime
   where
     waitForTicks :: StateT GameState IO ()
     waitForTicks = do
@@ -81,13 +86,13 @@ updateGame = do
         let ticksPassed = currentTicks >= gTicks + 16
         unless ticksPassed waitForTicks
 
-updateActors :: Float -> StateT GameState IO ()
-updateActors deltaTime = do
+updateActors :: GameData -> Float -> StateT GameState IO ()
+updateActors gameData deltaTime = do
     -- TODO: Implement addition and remotion of actors
     -- TODO: Set gameUpdatingActors to True
 
     -- Call update on each actor
-    gets gameUpdates >>= traverse_ ($ deltaTime)
+    gets gameUpdates >>= traverse_ (\up -> up gameData deltaTime)
 
     -- TODO: Set gameUpdatingActors to False
     -- TODO: filter dead actors from actors list

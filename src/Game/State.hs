@@ -27,10 +27,13 @@ data GameData = GameData
 data GameState = GameState
     { gameActions :: [IO ()]
     , gameTicks :: Word32
-    , gameBall :: Ball
+    , -- \* Actors
+      gameBall :: Ball
     , gamePaddle :: Paddle
+    , -- \* Game Loop Methods
+      gameProcessInputs :: [(SDL.Scancode -> Bool) -> StateT GameState IO ()]
+    , gameUpdates :: [GameData -> Float -> StateT GameState IO ()]
     , gameDraws :: [GameData -> StateT GameState IO ()]
-    , gameUpdates :: [Float -> StateT GameState IO ()]
     }
 
 -- | Helper that runs all clean actions
