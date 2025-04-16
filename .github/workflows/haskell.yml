@@ -19,15 +19,13 @@ jobs:
         os: [ubuntu-latest]
         ghc-version: ['9.4.8']
         include:
-          - os: windows-latest
-            ghc-version: '9.4.8'
           - os: macos-latest
             ghc-version: '9.4.8'
 
     steps:
       - uses: actions/checkout@v4
 
-      # System dependency installation for different OSes
+      # System dependency installation
       - name: Install Ubuntu dependencies
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -48,9 +46,17 @@ jobs:
       - name: Install Windows dependencies
         if: matrix.os == 'windows-latest'
         run: |
-          choco install mingw -y
-          # Note: Windows requires manual SDL2 installation or vcpkg setup
-          # Consider adding SDL2 binary download steps here
+          choco install msys2 -y --params="/NoUpdate"
+          C:\msys64\usr\bin\bash -lc "pacman -Syu --noconfirm"
+          C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm --needed \
+            mingw-w64-x86_64-toolchain \
+            mingw-w64-x86_64-SDL2 \
+            mingw-w64-x86_64-SDL2_ttf \
+            mingw-w64-x86_64-SDL2_image \
+            mingw-w64-x86_64-SDL2_mixer \
+            pkg-config"
+          echo "C:\msys64\mingw64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          echo "PKG_CONFIG_PATH=C:\msys64\mingw64\lib\pkgconfig" >> $env:GITHUB_ENV
 
       - name: Set up GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2

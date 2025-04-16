@@ -8,6 +8,13 @@ maintainer:         bernborgess@outlook.com
 category:           Game
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
+synopsis:           A Pong clone implemented in Haskell using SDL2
+description:        A classic Pong game implementation featuring SDL2-based graphics, sound effects, and game state management using modern Haskell.
+tested-with:        GHC ==9.4.8
+source-repository head
+  type:     git
+  location: https://github.com/bernborgess/haskell-pong
+  subdir:   .
 
 common warnings
     ghc-options: -Wall
