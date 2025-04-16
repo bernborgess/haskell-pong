@@ -1,15 +1,17 @@
-module Actors.Ball (Ball (..)) where
+module Actors.Ball (ballDraw) where
 
-import Data.Word (Word8)
-import Foreign.C.Types (CInt)
+import Control.Monad.State (StateT, gets)
+
 import qualified SDL
 
--- import qualified SDL.Raw
+import Actors.Types (Ball (..))
+import Game.State (GameData (..), GameState (..))
 
-data Ball = Ball
-    { ballPosition :: SDL.V2 CInt
-    , ballSize :: SDL.V2 CInt
-    , ballColor :: SDL.V4 Word8
-    }
-
--- ballDraw :: GameData -> Procedure
+ballDraw :: GameData -> StateT GameState IO ()
+ballDraw gd = do
+    ball <- gets gameBall
+    let renderer = gameRenderer gd
+        position = ballPosition ball
+        size = ballSize ball
+    SDL.rendererDrawColor renderer SDL.$= ballColor ball
+    SDL.fillRect renderer (Just $ SDL.Rectangle (SDL.P position) size)

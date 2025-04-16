@@ -1,11 +1,17 @@
-module Actors.Paddle (Paddle (..)) where
+module Actors.Paddle (paddleDraw) where
 
-import Data.Word (Word8)
+import Control.Monad.State (StateT, gets)
+
 import qualified SDL
-import qualified SDL.Raw.Types
 
-data Paddle = Paddle
-    { paddlePosition :: SDL.V2 Int
-    , paddleSize :: SDL.V2 Int
-    , paddleColor :: SDL.V4 Word8
-    }
+import Actors.Types (Paddle (..))
+import Game.State (GameData (..), GameState (..))
+
+paddleDraw :: GameData -> StateT GameState IO ()
+paddleDraw gd = do
+    paddle <- gets gamePaddle
+    let renderer = gameRenderer gd
+        position = paddlePosition paddle
+        size = paddleSize paddle
+    SDL.rendererDrawColor renderer SDL.$= paddleColor paddle
+    SDL.fillRect renderer (Just $ SDL.Rectangle (SDL.P position) size)

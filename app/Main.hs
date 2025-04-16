@@ -5,12 +5,12 @@ import Control.Monad.State (evalStateT)
 import Game (
     exitClean,
     gameLoop,
-    initSDL,
     initialGameState,
+    initialize,
  )
 
 main :: IO ()
 main = flip evalStateT initialGameState $ do
-    gameData <- initSDL
+    gameData <- initialize
     gameLoop gameData
     exitClean

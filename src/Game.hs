@@ -5,22 +5,20 @@ module Game (
     exitClean,
 
     -- * Initialization
-    initSDL,
+    initialize,
 )
 where
 
 import Control.Monad.State (StateT, forM_, gets)
+import Data.Foldable (traverse_)
 
 import qualified SDL
 
-import Data.Foldable (traverse_)
-import Foreign.C.Types (CInt)
-import Game.Initialize (initSDL)
+import Game.Initialize (initialGameState, initialize)
 import Game.State (
     GameData (..),
     GameState (gameDraws),
     exitClean,
-    initialGameState,
  )
 
 gameLoop :: GameData -> StateT GameState IO ()
