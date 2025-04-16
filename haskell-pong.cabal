@@ -19,6 +19,7 @@ library
                       Game.Initialize
                       Game.State
                       Game.Config
+                      Components.DrawComponent
                       Actors.Types
                       Actors.Ball
                       Actors.Paddle

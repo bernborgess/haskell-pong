@@ -7,14 +7,12 @@ module Actors.Paddle (
 
 import Control.Monad.State (StateT, gets, modify, when)
 import Data.Ord (clamp)
-import GHC.Float (floorFloat)
 
 import qualified SDL
 
 import Actors.Types (Paddle (..))
-import Foreign.C.Types (CInt)
+import Components.DrawComponent (drawRectangle)
 import Game.State (GameData (..), GameState (..))
-import Linear (V2 (V2))
 
 paddleVerticalSpeed :: Float
 paddleVerticalSpeed = 1000.0
@@ -61,29 +59,7 @@ paddleUpdate gameData deltaTime = do
 
         modify $ \gs -> gs{gamePaddle = paddle{paddlePosition = SDL.V2 paddleX newPaddleY}}
 
-paddleDraw :: GameData -> StateT GameState IO ()
-paddleDraw gd = do
-    let renderer = gameRenderer gd
+paddleDraw :: SDL.Renderer -> StateT GameState IO ()
+paddleDraw renderer = do
     paddle <- gets gamePaddle
-    SDL.rendererDrawColor renderer SDL.$= paddleColor paddle
-
-    -- \* Create a SDL_Rect rectangle to visually represent the object:
-    -- The position of the rectangle should be the center of the object
-    -- (not the upper left corner, as originally defined by SDL).
-    -- This will make collision calculations easier.
-
-    -- Get the original position of the object (upper left corner) , the width and height
-    let V2 posX posY = paddlePosition paddle
-        width = toEnum $ paddleWidth paddle
-        height = toEnum $ paddleHeight paddle
-
-    -- To move the object's position to its center, subtract the original position from the x coordinate
-    -- by half the object's width
-    let px = floorFloat posX - width `div` 2 :: CInt
-    -- and the y coordinate by half the height
-    let py = floorFloat posY - height `div` 2 :: CInt
-    -- Assign the result of these operations as the final position of the created rectangle.
-    -- The height and width of the object do not need to be transformed.
-    let rectangle = SDL.Rectangle (SDL.P (SDL.V2 px py)) (SDL.V2 width height)
-
-    SDL.fillRect renderer (Just rectangle)
+    drawRectangle (paddlePosition paddle) (paddleWidth paddle, paddleHeight paddle) (Just $ paddleColor paddle) renderer

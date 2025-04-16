@@ -105,7 +105,6 @@ generateOutput gameData = do
     SDL.rendererDrawColor renderer SDL.$= colorEerieBlack
     SDL.clear renderer
 
-    gets gameDraws >>= traverse_ ($ gameData)
+    gets gameDraws >>= traverse_ ($ renderer)
 
     SDL.present renderer
-    SDL.delay 16

@@ -33,7 +33,7 @@ data GameState = GameState
     , -- \* Game Loop Methods
       gameProcessInputs :: [(SDL.Scancode -> Bool) -> StateT GameState IO ()]
     , gameUpdates :: [GameData -> Float -> StateT GameState IO ()]
-    , gameDraws :: [GameData -> StateT GameState IO ()]
+    , gameDraws :: [SDL.Renderer -> StateT GameState IO ()]
     }
 
 -- | Helper that runs all clean actions
