@@ -11,6 +11,7 @@ where
 
 import Control.Monad.State (StateT, get, gets, put, unless)
 import Data.Foldable (traverse_)
+import Linear (V2 (V2))
 
 import qualified SDL
 
@@ -18,7 +19,8 @@ import qualified SDL
 
 import Actors.Ball (ballSetPosition, ballSetVelocity, initializeBall, newBall)
 import Actors.Paddle (initializePaddle, newPaddle, paddleSetPosition)
-import Game.Config (windowConfig, windowTitle)
+import Data.Text (Text, pack)
+import Foreign.C.Types (CInt)
 import Game.State (
     GameData (..),
     GameProcedure,
@@ -27,7 +29,6 @@ import Game.State (
     safeRun,
     shutdown,
  )
-import Linear (V2 (V2))
 
 initialGameState :: GameState
 initialGameState =
@@ -43,14 +44,24 @@ initialGameState =
         , gameDraws = []
         }
 
-initialize :: StateT GameState IO GameData
-initialize = do
+initialize :: CInt -> CInt -> StateT GameState IO GameData
+initialize windowWidth windowHeight = do
     addClean $ putStrLn "All Clean!"
 
     safeRun
         SDL.initializeAll
         "Error initializing SDL2"
     addClean SDL.quit
+
+    let windowConfig :: SDL.WindowConfig
+        windowConfig =
+            SDL.defaultWindow
+                { SDL.windowPosition = SDL.Centered
+                , SDL.windowInitialSize = SDL.V2 windowWidth windowHeight
+                }
+
+        windowTitle :: Text
+        windowTitle = pack "Pong in Haskell"
 
     window <-
         safeRun

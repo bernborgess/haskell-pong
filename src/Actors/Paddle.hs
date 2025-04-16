@@ -6,7 +6,7 @@ module Actors.Paddle (
     paddleSetPosition,
 ) where
 
-import Control.Monad.State (get, gets, modify, when)
+import Control.Monad.State (gets, modify, when)
 import Data.Ord (clamp)
 
 import qualified SDL
