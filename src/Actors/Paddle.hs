@@ -5,7 +5,7 @@ module Actors.Paddle (
     paddleDraw,
 ) where
 
-import Control.Monad.State (MonadIO (liftIO), StateT, gets, liftIO, modify, when)
+import Control.Monad.State (StateT, gets, modify, when)
 import Data.Ord (clamp)
 import GHC.Float (floorFloat)
 
@@ -14,59 +14,76 @@ import qualified SDL
 import Actors.Types (Paddle (..))
 import Foreign.C.Types (CInt)
 import Game.State (GameData (..), GameState (..))
-import Text.Printf (printf)
+import Linear (V2 (V2))
 
-paddleVel :: CInt
-paddleVel = 100
+paddleVerticalSpeed :: Float
+paddleVerticalSpeed = 1000.0
 
 newPaddle :: Paddle
 newPaddle =
     Paddle
-        { paddlePosition = SDL.V2 100 100
-        , paddleSize = SDL.V2 15 100
+        { paddlePosition = SDL.V2 100.0 100.0
+        , paddleWidth = 15
+        , paddleHeight = 100
         , paddleColor = SDL.V4 0 255 0 0 -- Lime #00FF00
-        , paddleDirection = 0
+        , paddleDirection = 0.0
         }
 
 paddleProcessInput :: (SDL.Scancode -> Bool) -> StateT GameState IO ()
 paddleProcessInput ks = do
     modify $ \gs -> gs{gamePaddle = (gamePaddle gs){paddleDirection = newDirection}}
-    liftIO $ printf "New paddle direction: %d\n" (fromEnum newDirection)
   where
     -- Change direction
     up = ks SDL.ScancodeUp || ks SDL.ScancodeW
     down = ks SDL.ScancodeDown || ks SDL.ScancodeS
-    newDirection
-        | up = -1
-        | down = 1
-        | otherwise = 0
+    newDirection | up = -1 | down = 1 | otherwise = 0
 
 paddleUpdate :: GameData -> Float -> StateT GameState IO ()
 paddleUpdate gameData deltaTime = do
     paddle <- gets gamePaddle
     let direction = paddleDirection paddle
     when (direction /= 0) $ do
-        -- TODO: Keep positions with Float instead of CInt
-        let deltaY = fromIntegral (paddleVel * direction) * deltaTime
-            window = gameWindow gameData
-        windowConfig <- SDL.getWindowConfig window
-        let SDL.V2 _windowWidth windowHeight = SDL.windowInitialSize windowConfig
-            SDL.V2 _ paddleHeight = paddleSize paddle
-            mHeight = fromIntegral paddleHeight :: Float
-            screenY = fromIntegral windowHeight :: Float
-            SDL.V2 paddleX paddleY = paddlePosition paddle
-            mPosY = fromIntegral paddleY :: Float
-            newY = clamp (mHeight / 2.0, screenY - mHeight / 2.0) (mPosY + deltaY)
-            finalPaddleY = floorFloat newY :: CInt
+        let deltaY = paddleVerticalSpeed * direction * deltaTime
 
-        modify $ \gs -> gs{gamePaddle = paddle{paddlePosition = SDL.V2 paddleX finalPaddleY}}
-        liftIO $ putStrLn "Entrei no when!"
+        -- Get screen height
+        windowConfig <- SDL.getWindowConfig (gameWindow gameData)
+        let SDL.V2 _ windowHeight = SDL.windowInitialSize windowConfig
+            screenY = fromIntegral windowHeight :: Float
+
+        -- Get paddle height
+        let mHeight = fromIntegral (paddleHeight paddle) :: Float
+
+            -- Get current position
+            SDL.V2 paddleX paddleY = paddlePosition paddle
+
+            -- Calculate new position
+            newPaddleY = clamp (mHeight / 2.0, screenY - mHeight / 2.0) (paddleY + deltaY)
+
+        modify $ \gs -> gs{gamePaddle = paddle{paddlePosition = SDL.V2 paddleX newPaddleY}}
 
 paddleDraw :: GameData -> StateT GameState IO ()
 paddleDraw gd = do
-    paddle <- gets gamePaddle
     let renderer = gameRenderer gd
-        position = paddlePosition paddle
-        size = paddleSize paddle
+    paddle <- gets gamePaddle
     SDL.rendererDrawColor renderer SDL.$= paddleColor paddle
-    SDL.fillRect renderer (Just $ SDL.Rectangle (SDL.P position) size)
+
+    -- \* Create a SDL_Rect rectangle to visually represent the object:
+    -- The position of the rectangle should be the center of the object
+    -- (not the upper left corner, as originally defined by SDL).
+    -- This will make collision calculations easier.
+
+    -- Get the original position of the object (upper left corner) , the width and height
+    let V2 posX posY = paddlePosition paddle
+        width = toEnum $ paddleWidth paddle
+        height = toEnum $ paddleHeight paddle
+
+    -- To move the object's position to its center, subtract the original position from the x coordinate
+    -- by half the object's width
+    let px = floorFloat posX - width `div` 2 :: CInt
+    -- and the y coordinate by half the height
+    let py = floorFloat posY - height `div` 2 :: CInt
+    -- Assign the result of these operations as the final position of the created rectangle.
+    -- The height and width of the object do not need to be transformed.
+    let rectangle = SDL.Rectangle (SDL.P (SDL.V2 px py)) (SDL.V2 width height)
+
+    SDL.fillRect renderer (Just rectangle)

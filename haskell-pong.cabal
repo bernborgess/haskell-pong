@@ -15,13 +15,16 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Game
-    other-modules:
+    -- other-modules:
                       Game.Initialize
                       Game.State
                       Game.Config
                       Actors.Types
                       Actors.Ball
                       Actors.Paddle
+
+    -- To read the internal docs pass all the above to "exposed-modules" instead
+    -- and run `cabal haddock --haddock-all`
 
     build-depends:    base ^>=4.17.2.1,
                       sdl2 ^>=2.5.5.0,

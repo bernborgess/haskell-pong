@@ -1,18 +1,20 @@
 module Actors.Types (Ball (..), Paddle (..)) where
 
 import Data.Word (Word8)
-import Foreign.C.Types (CInt)
+import Linear (V2)
+
 import qualified SDL
 
 data Ball = Ball
-    { ballPosition :: SDL.V2 CInt
-    , ballSize :: SDL.V2 CInt
+    { ballPosition :: V2 Float
+    , ballSize :: Int
     , ballColor :: SDL.V4 Word8
     }
 
 data Paddle = Paddle
-    { paddlePosition :: SDL.V2 CInt
-    , paddleSize :: SDL.V2 CInt
+    { paddlePosition :: V2 Float
+    , paddleWidth :: Int
+    , paddleHeight :: Int
     , paddleColor :: SDL.V4 Word8
-    , paddleDirection :: CInt
+    , paddleDirection :: Float
     }
