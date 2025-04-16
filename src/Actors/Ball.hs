@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Actors.Ball (newBall, ballDraw) where
 
 import Control.Monad.State (gets)
@@ -19,5 +21,5 @@ newBall =
 
 ballDraw :: SDL.Renderer -> GameProcedure
 ballDraw renderer = do
-    ball <- gets gameBall
-    drawRectangle (ballPosition ball) (ballSize ball, ballSize ball) (Just $ ballColor ball) renderer
+    Ball{ballPosition, ballSize, ballColor} <- gets gameBall
+    drawRectangle ballPosition (ballSize, ballSize) (Just ballColor) renderer

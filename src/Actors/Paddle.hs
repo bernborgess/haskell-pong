@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Actors.Paddle (
     newPaddle,
     paddleProcessInput,
@@ -61,5 +63,5 @@ paddleUpdate gameData deltaTime = do
 
 paddleDraw :: SDL.Renderer -> GameProcedure
 paddleDraw renderer = do
-    paddle <- gets gamePaddle
-    drawRectangle (paddlePosition paddle) (paddleWidth paddle, paddleHeight paddle) (Just $ paddleColor paddle) renderer
+    Paddle{paddlePosition, paddleWidth, paddleHeight, paddleColor} <- gets gamePaddle
+    drawRectangle paddlePosition (paddleWidth, paddleHeight) (Just paddleColor) renderer
