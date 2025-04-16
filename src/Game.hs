@@ -1,33 +1,88 @@
 module Game (
     -- * Core Game Functions
-    gameLoop,
+    runLoop,
     initialGameState,
-    exitClean,
+    shutdown,
 
     -- * Initialization
     initialize,
 )
 where
 
-import Control.Monad.State (get, gets, put, unless)
+import Control.Monad.State (StateT, get, gets, put, unless)
 import Data.Foldable (traverse_)
 
 import qualified SDL
 
-import Game.Initialize (initialGameState, initialize)
+-- import Game.Initialize (initialGameState, initialize)
+
+import Actors.Ball (ballSetPosition, ballSetVelocity, initializeBall, newBall)
+import Actors.Paddle (initializePaddle, newPaddle, paddleSetPosition)
+import Game.Config (windowConfig, windowTitle)
 import Game.State (
     GameData (..),
     GameProcedure,
     GameState (..),
-    exitClean,
+    addClean,
+    safeRun,
+    shutdown,
  )
+import Linear (V2 (V2))
 
-gameLoop :: GameData -> GameProcedure
-gameLoop gameData = do
+initialGameState :: GameState
+initialGameState =
+    GameState
+        { gameActions = []
+        , gameTicks = 0
+        , -- \* Actors
+          gameBall = newBall
+        , gamePaddle = newPaddle
+        , -- \* Game Loop Methods
+          gameProcessInputs = []
+        , gameUpdates = []
+        , gameDraws = []
+        }
+
+initialize :: StateT GameState IO GameData
+initialize = do
+    addClean $ putStrLn "All Clean!"
+
+    safeRun
+        SDL.initializeAll
+        "Error initializing SDL2"
+    addClean SDL.quit
+
+    window <-
+        safeRun
+            (SDL.createWindow windowTitle windowConfig)
+            "Error creating the Window"
+    addClean $ SDL.destroyWindow window
+
+    renderer <-
+        safeRun
+            (SDL.createRenderer window (-1) SDL.defaultRenderer)
+            "Error creating the Renderer"
+    addClean $ SDL.destroyRenderer renderer
+
+    addClean $ SDL.destroyRenderer renderer
+
+    addClean $ putStrLn "Start Cleaning"
+
+    -- Set the initial clock
+    gs <- get
+    ticks <- SDL.ticks
+    put gs{gameTicks = ticks}
+
+    initializeActors
+
+    return GameData{gameRenderer = renderer, gameWindow = window}
+
+runLoop :: GameData -> GameProcedure
+runLoop gameData = do
     processInput gameData
     updateGame gameData
     generateOutput gameData
-    gameLoop gameData
+    runLoop gameData
 
 {- | Process all queued SDL events
  Handles:
@@ -59,10 +114,10 @@ processInput _ = do
         keyCode = SDL.keysymKeycode (SDL.keyboardEventKeysym ke)
 
     handleQuitEvent :: GameProcedure
-    handleQuitEvent = exitClean
+    handleQuitEvent = shutdown
 
     handleEscape :: GameProcedure
-    handleEscape = exitClean
+    handleEscape = shutdown
 
 updateGame :: GameData -> GameProcedure
 updateGame gameData = do
@@ -109,3 +164,15 @@ generateOutput gameData = do
     gets gameDraws >>= traverse_ ($ renderer)
 
     SDL.present renderer
+
+initializeActors :: GameProcedure
+initializeActors = do
+    --  Instantiate the mPaddle paddle and initialize its position with the paddleSetPosition method
+    initializePaddle
+    paddleSetPosition $ V2 100.0 100.0
+
+    -- Instantiate the mBall ball and initialize its position and velocity with the
+    -- ballSetPosition and ballSetVelocity methods, respectively
+    initializeBall
+    ballSetPosition $ V2 400.0 400.0
+    ballSetVelocity $ V2 400.0 400.0

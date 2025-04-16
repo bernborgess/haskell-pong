@@ -2,19 +2,19 @@
 
 module Actors.Paddle (
     newPaddle,
-    paddleProcessInput,
-    paddleUpdate,
-    paddleDraw,
+    initializePaddle,
+    paddleSetPosition,
 ) where
 
-import Control.Monad.State (gets, modify, when)
+import Control.Monad.State (get, gets, modify, when)
 import Data.Ord (clamp)
 
 import qualified SDL
 
 import Actors.Types (Paddle (..))
 import Components.DrawComponent (drawRectangle)
-import Game.State (DrawProcedure, GameData (..), GameState (..), ProcessInputProcedure, UpdateProcedure)
+import Game.State (DrawProcedure, GameData (..), GameProcedure, GameState (..), ProcessInputProcedure, UpdateProcedure, addActor, addDrawable)
+import Linear (V2 (V2))
 
 paddleVerticalSpeed :: Float
 paddleVerticalSpeed = 1000.0
@@ -22,12 +22,22 @@ paddleVerticalSpeed = 1000.0
 newPaddle :: Paddle
 newPaddle =
     Paddle
-        { paddlePosition = SDL.V2 100.0 100.0
+        { paddlePosition = V2 100.0 100.0
         , paddleWidth = 15
         , paddleHeight = 100
         , paddleColor = SDL.V4 0 255 0 0 -- Lime #00FF00
         , paddleDirection = 0.0
         }
+
+initializePaddle :: GameProcedure
+initializePaddle = do
+    addDrawable paddleDraw
+    addActor (Just paddleProcessInput) paddleUpdate
+
+paddleSetPosition :: V2 Float -> GameProcedure
+paddleSetPosition pos = do
+    paddle <- gets gamePaddle
+    modify $ \gs -> gs{gamePaddle = paddle{paddlePosition = pos}}
 
 paddleProcessInput :: ProcessInputProcedure
 paddleProcessInput ks = do

@@ -1,25 +1,45 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Actors.Ball (newBall, ballUpdate, ballDraw) where
+module Actors.Ball (
+    newBall,
+    initializeBall,
+    ballSetPosition,
+    ballSetVelocity,
+) where
 
 import Control.Monad.State (get, gets, modify, when)
-import Linear (V2 (V2))
+import Linear (V2 (V2), zero)
 
 import qualified SDL
 
 import Actors.Types (Ball (..), Paddle (..))
 import Components.DrawComponent (drawRectangle)
 import Data.Ord (clamp)
-import Game.State (DrawProcedure, GameData (gameWindow), GameState (..), UpdateProcedure, exitClean)
+import Game.State (DrawProcedure, GameData (gameWindow), GameProcedure, GameState (..), UpdateProcedure, addActor, addDrawable, shutdown)
 
 newBall :: Ball
 newBall =
     Ball
-        { ballPosition = V2 400.0 400.0
+        { ballPosition = zero
         , ballSize = 15
-        , ballVelocity = V2 400.0 400.0
+        , ballVelocity = zero
         , ballColor = SDL.V4 250 255 250 255 -- HoneyDew #F0FFF0
         }
+
+initializeBall :: GameProcedure
+initializeBall = do
+    addDrawable ballDraw
+    addActor Nothing ballUpdate
+
+ballSetPosition :: V2 Float -> GameProcedure
+ballSetPosition pos = do
+    ball <- gets gameBall
+    modify $ \gs -> gs{gameBall = ball{ballPosition = pos}}
+
+ballSetVelocity :: V2 Float -> GameProcedure
+ballSetVelocity pos = do
+    ball <- gets gameBall
+    modify $ \gs -> gs{gameBall = ball{ballVelocity = pos}}
 
 ballUpdate :: UpdateProcedure
 ballUpdate gameData deltaTime = do
@@ -40,7 +60,7 @@ ballUpdate gameData deltaTime = do
         dy = abs $ newPosY - paddlePosY
 
     -- \* Ball passed through the left edge -> GAME OVER
-    when (newPosX < 0.0) exitClean
+    when (newPosX < 0.0) shutdown
 
     let newVelX
             -- Hit the paddle

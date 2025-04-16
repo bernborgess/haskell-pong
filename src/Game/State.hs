@@ -6,13 +6,15 @@ module Game.State (
     UpdateProcedure,
     DrawProcedure,
     addClean,
-    exitClean,
+    addDrawable,
+    addActor,
+    shutdown,
     safeRun,
 )
 where
 
 import Control.Exception (SomeException, catch)
-import Control.Monad.State (StateT, forM_, gets, liftIO, modify)
+import Control.Monad.State (StateT, forM_, get, gets, liftIO, modify)
 import Data.Word (Word32)
 import System.Exit (exitFailure, exitSuccess)
 import System.IO (hPrint, hPutStrLn, stderr)
@@ -48,8 +50,8 @@ type UpdateProcedure = GameData -> Float -> GameProcedure
 type DrawProcedure = SDL.Renderer -> GameProcedure
 
 -- | Helper that runs all clean actions
-exitClean :: GameProcedure
-exitClean = do
+shutdown :: GameProcedure
+shutdown = do
     actions <- gets gameActions
     forM_ actions liftIO
     liftIO exitSuccess
@@ -76,3 +78,21 @@ addClean action =
     modify $ \gameState ->
         let oldActions = gameActions gameState
          in gameState{gameActions = action : oldActions}
+
+addDrawable :: DrawProcedure -> GameProcedure
+addDrawable draw = do
+    GameState{gameDraws = draws} <- get
+    modify $ \gs -> gs{gameDraws = draw : draws}
+
+addActor :: Maybe ProcessInputProcedure -> UpdateProcedure -> GameProcedure
+addActor mpri up = do
+    GameState{gameProcessInputs = pris, gameUpdates = ups} <- get
+    let npris = case mpri of
+            Just pri -> pri : pris
+            Nothing -> pris
+
+    modify $ \gs ->
+        gs
+            { gameProcessInputs = npris
+            , gameUpdates = up : ups
+            }

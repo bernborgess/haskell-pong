@@ -16,7 +16,6 @@ library
     import:           warnings
     exposed-modules:  Game
     -- other-modules:
-                      Game.Initialize
                       Game.State
                       Game.Config
                       Components.DrawComponent
