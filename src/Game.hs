@@ -9,7 +9,7 @@ module Game (
 )
 where
 
-import Control.Monad.State (StateT, get, gets, put, unless)
+import Control.Monad.State (get, gets, put, unless)
 import Data.Foldable (traverse_)
 
 import qualified SDL
@@ -17,11 +17,12 @@ import qualified SDL
 import Game.Initialize (initialGameState, initialize)
 import Game.State (
     GameData (..),
+    GameProcedure,
     GameState (..),
     exitClean,
  )
 
-gameLoop :: GameData -> StateT GameState IO ()
+gameLoop :: GameData -> GameProcedure
 gameLoop gameData = do
     processInput gameData
     updateGame gameData
@@ -33,21 +34,21 @@ gameLoop gameData = do
  - ESC: Clean exit
  - Window close: Clean exit
 -}
-processInput :: GameData -> StateT GameState IO ()
-processInput gameData = do
+processInput :: GameData -> GameProcedure
+processInput _ = do
     -- Game Events
     SDL.pollEvents >>= traverse_ handleSingleEvent
     -- Pass keyboard state to process input of actors
     ks <- SDL.getKeyboardState
     gets gameProcessInputs >>= traverse_ ($ ks)
   where
-    handleSingleEvent :: SDL.Event -> StateT GameState IO ()
+    handleSingleEvent :: SDL.Event -> GameProcedure
     handleSingleEvent event = case SDL.eventPayload event of
         SDL.KeyboardEvent ke -> handleKeyboardEvent ke
         SDL.QuitEvent -> handleQuitEvent
         _ -> pure ()
 
-    handleKeyboardEvent :: SDL.KeyboardEventData -> StateT GameState IO ()
+    handleKeyboardEvent :: SDL.KeyboardEventData -> GameProcedure
     handleKeyboardEvent ke
         | isKeyPressed = case keyCode of
             SDL.KeycodeEscape -> handleEscape
@@ -57,13 +58,13 @@ processInput gameData = do
         isKeyPressed = SDL.keyboardEventKeyMotion ke == SDL.Pressed
         keyCode = SDL.keysymKeycode (SDL.keyboardEventKeysym ke)
 
-    handleQuitEvent :: StateT GameState IO ()
+    handleQuitEvent :: GameProcedure
     handleQuitEvent = exitClean
 
-    handleEscape :: StateT GameState IO ()
+    handleEscape :: GameProcedure
     handleEscape = exitClean
 
-updateGame :: GameData -> StateT GameState IO ()
+updateGame :: GameData -> GameProcedure
 updateGame gameData = do
     -- Wait for enough ticks
     waitForTicks
@@ -79,14 +80,14 @@ updateGame gameData = do
     -- Runs updates of all Actors with deltaTime
     updateActors gameData deltaTime
   where
-    waitForTicks :: StateT GameState IO ()
+    waitForTicks :: GameProcedure
     waitForTicks = do
         currentTicks <- SDL.ticks
         gTicks <- gets gameTicks
         let ticksPassed = currentTicks >= gTicks + 16
         unless ticksPassed waitForTicks
 
-updateActors :: GameData -> Float -> StateT GameState IO ()
+updateActors :: GameData -> Float -> GameProcedure
 updateActors gameData deltaTime = do
     -- TODO: Implement addition and remotion of actors
     -- TODO: Set gameUpdatingActors to True
@@ -98,7 +99,7 @@ updateActors gameData deltaTime = do
     -- TODO: filter dead actors from actors list
     return ()
 
-generateOutput :: GameData -> StateT GameState IO ()
+generateOutput :: GameData -> GameProcedure
 generateOutput gameData = do
     let renderer = gameRenderer gameData
     let colorEerieBlack = SDL.V4 27 27 27 255

@@ -1,6 +1,5 @@
 module Components.DrawComponent (drawRectangle) where
 
-import Control.Monad.State (StateT)
 import Data.Maybe (fromMaybe)
 import Data.Word (Word8)
 import Foreign.C.Types (CInt)
@@ -9,9 +8,9 @@ import Linear (V2 (V2))
 
 import qualified SDL
 
-import Game.State (GameState)
+import Game.State (GameProcedure)
 
-drawRectangle :: V2 Float -> (Int, Int) -> Maybe (SDL.V4 Word8) -> SDL.Renderer -> StateT GameState IO ()
+drawRectangle :: V2 Float -> (Int, Int) -> Maybe (SDL.V4 Word8) -> SDL.Renderer -> GameProcedure
 drawRectangle (V2 posX posY) (width, height) mc renderer = do
     SDL.rendererDrawColor renderer SDL.$= color
     -- \* Create a SDL_Rect rectangle to visually represent the object:

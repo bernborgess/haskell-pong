@@ -1,6 +1,7 @@
 module Game.State (
     GameData (..),
     GameState (..),
+    GameProcedure,
     addClean,
     exitClean,
     safeRun,
@@ -31,13 +32,16 @@ data GameState = GameState
       gameBall :: Ball
     , gamePaddle :: Paddle
     , -- \* Game Loop Methods
-      gameProcessInputs :: [(SDL.Scancode -> Bool) -> StateT GameState IO ()]
-    , gameUpdates :: [GameData -> Float -> StateT GameState IO ()]
-    , gameDraws :: [SDL.Renderer -> StateT GameState IO ()]
+      gameProcessInputs :: [(SDL.Scancode -> Bool) -> GameProcedure]
+    , gameUpdates :: [GameData -> Float -> GameProcedure]
+    , gameDraws :: [SDL.Renderer -> GameProcedure]
     }
 
+-- | Type Alias used when mutating game state
+type GameProcedure = StateT GameState IO ()
+
 -- | Helper that runs all clean actions
-exitClean :: StateT GameState IO ()
+exitClean :: GameProcedure
 exitClean = do
     actions <- gets gameActions
     forM_ actions liftIO
@@ -60,7 +64,7 @@ safeRun action errorMsg = do
     liftIO $ catch action $ errorClean actions errorMsg
 
 -- | Method to add an action to the cleanup list
-addClean :: IO () -> StateT GameState IO ()
+addClean :: IO () -> GameProcedure
 addClean action =
     modify $ \gameState ->
         let oldActions = gameActions gameState
