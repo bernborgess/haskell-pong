@@ -1,4 +1,4 @@
-module Game.StateManagement (
+module Game.State (
     GameData (..),
     GameState (..),
     addClean,

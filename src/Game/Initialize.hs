@@ -1,11 +1,11 @@
-module Game.InitSDL (initSDL) where
+module Game.Initialize (initSDL) where
 
 import Control.Monad.State (StateT)
 
 import qualified SDL
 
 import Game.Config (windowConfig, windowTitle)
-import Game.StateManagement (GameData (..), GameState, addClean, safeRun)
+import Game.State (GameData (..), GameState, addClean, safeRun)
 
 initSDL :: StateT GameState IO GameData
 initSDL = do

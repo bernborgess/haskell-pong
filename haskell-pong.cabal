@@ -16,9 +16,10 @@ library
     import:           warnings
     exposed-modules:  Game
     other-modules:
-                      Game.InitSDL
-                      Game.StateManagement
+                      Game.Initialize
+                      Game.State
                       Game.Config
+                      Actors.Types
                       Actors.Ball
                       Actors.Paddle
 

@@ -15,8 +15,8 @@ import qualified SDL
 
 import Data.Foldable (traverse_)
 import Foreign.C.Types (CInt)
-import Game.InitSDL (initSDL)
-import Game.StateManagement (
+import Game.Initialize (initSDL)
+import Game.State (
     GameData (..),
     GameState (gameDraws),
     exitClean,
