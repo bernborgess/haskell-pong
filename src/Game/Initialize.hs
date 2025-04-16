@@ -5,7 +5,7 @@ import Control.Monad.State (StateT)
 import qualified SDL
 
 import Actors.Ball (ballDraw)
-import Actors.Paddle (paddleDraw)
+import Actors.Paddle (paddleDraw, paddleUpdate)
 import Actors.Types (Ball (..), Paddle (..))
 import Game.Config (windowConfig, windowTitle)
 import Game.State (GameData (..), GameState (..), addClean, safeRun)
@@ -54,5 +54,5 @@ initialGameState =
                 , paddleColor = SDL.V4 0 255 0 0 -- Lime #00FF00
                 }
         , gameDraws = [ballDraw, paddleDraw]
-        , gameUpdates = []
+        , gameUpdates = [paddleUpdate]
         }

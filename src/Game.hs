@@ -9,15 +9,15 @@ module Game (
 )
 where
 
-import Control.Monad.State (StateT, forM_, gets)
-import Data.Foldable (traverse_)
+import Control.Monad.State (StateT, gets)
+import Data.Foldable (sequenceA_, traverse_)
 
 import qualified SDL
 
 import Game.Initialize (initialGameState, initialize)
 import Game.State (
     GameData (..),
-    GameState (gameDraws),
+    GameState (gameDraws, gameUpdates),
     exitClean,
  )
 
@@ -58,10 +58,8 @@ processInput gameData = SDL.pollEvents >>= traverse_ handleSingleEvent
     handleEscape :: StateT GameState IO ()
     handleEscape = exitClean
 
--- TODO
 updateGame :: StateT GameState IO ()
-updateGame = do
-    return ()
+updateGame = gets gameUpdates >>= sequenceA_
 
 generateOutput :: GameData -> StateT GameState IO ()
 generateOutput gameData = do
@@ -70,14 +68,7 @@ generateOutput gameData = do
     SDL.rendererDrawColor renderer SDL.$= colorEerieBlack
     SDL.clear renderer
 
-    drawables <- gets gameDraws
-    forM_ drawables $ \d -> d gameData
-    -- ? Test: Just draw a square
-
-    -- let colorHoneyDew = SDL.V4 250 255 250 255
-    -- SDL.rendererDrawColor renderer SDL.$= colorHoneyDew
-    -- let square = SDL.Rectangle (SDL.P (SDL.V2 0 0)) (SDL.V2 100 100) :: SDL.Rectangle CInt
-    -- SDL.fillRect renderer (Just square)
+    gets gameDraws >>= traverse_ ($ gameData)
 
     SDL.present renderer
     SDL.delay 16
