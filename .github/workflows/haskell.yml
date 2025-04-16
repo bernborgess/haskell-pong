@@ -5,9 +5,6 @@ on:
   pull_request:
     branches: [main, master]
 
-# INFO: The following configuration block ensures that only one build runs per branch,
-# which may be desirable for projects with a costly build process.
-# Remove this block from the CI workflow to let each CI job run to completion.
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -21,7 +18,6 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ghc-version: ['9.4.8']
-
         include:
           - os: windows-latest
             ghc-version: '9.4.8'
@@ -31,12 +27,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # System dependency installation for different OSes
+      - name: Install Ubuntu dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            pkg-config \
+            libsdl2-dev \
+            libsdl2-ttf-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev
+
+      - name: Install macOS dependencies
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install sdl2 sdl2_ttf sdl2_image sdl2_mixer
+
+      - name: Install Windows dependencies
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install mingw -y
+          # Note: Windows requires manual SDL2 installation or vcpkg setup
+          # Consider adding SDL2 binary download steps here
+
       - name: Set up GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          # Defaults, added for clarity:
           cabal-version: 'latest'
           cabal-update: true
 
@@ -44,7 +64,6 @@ jobs:
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
           cabal build all --dry-run
-        # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies
         uses: actions/cache/restore@v4
@@ -57,14 +76,11 @@ jobs:
           restore-keys: ${{ env.key }}-
 
       - name: Install dependencies
-        # If we had an exact cache hit, the dependencies will be up to date.
         if: steps.cache.outputs.cache-hit != 'true'
         run: cabal build all --only-dependencies
 
-      # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
       - name: Save cached dependencies
         uses: actions/cache/save@v4
-        # If we had an exact cache hit, trying to save the cache would error because of key clash.
         if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
@@ -80,8 +96,4 @@ jobs:
         run: cabal check
 
       - name: Build documentation
-        run:
-          cabal haddock all --disable-documentation
-          # --disable-documentation disables building documentation for dependencies.
-          # The package's own documentation is still built,
-          # yet 
+        run: cabal haddock all --disable-documentation
