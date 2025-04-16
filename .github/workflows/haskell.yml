@@ -19,8 +19,6 @@ jobs:
         os: [ubuntu-latest]
         ghc-version: ['9.4.8']
         include:
-          - os: windows-latest
-            ghc-version: '9.4.8'
           - os: macos-latest
             ghc-version: '9.4.8'
 
