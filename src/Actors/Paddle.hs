@@ -11,8 +11,8 @@ import Game.State (GameData (..), GameState (..))
 paddleVel :: CInt
 paddleVel = 10
 
-paddleUpdate :: StateT GameState IO ()
-paddleUpdate = do
+paddleUpdate :: Float -> StateT GameState IO ()
+paddleUpdate deltaTime = do
     ks <- SDL.getKeyboardState
     gs <- get
     let up = ks SDL.ScancodeUp || ks SDL.ScancodeW

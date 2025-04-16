@@ -9,15 +9,15 @@ module Game (
 )
 where
 
-import Control.Monad.State (StateT, gets)
-import Data.Foldable (sequenceA_, traverse_)
+import Control.Monad.State (StateT, get, gets, put, unless)
+import Data.Foldable (traverse_)
 
 import qualified SDL
 
 import Game.Initialize (initialGameState, initialize)
 import Game.State (
     GameData (..),
-    GameState (gameDraws, gameUpdates),
+    GameState (..),
     exitClean,
  )
 
@@ -59,7 +59,39 @@ processInput gameData = SDL.pollEvents >>= traverse_ handleSingleEvent
     handleEscape = exitClean
 
 updateGame :: StateT GameState IO ()
-updateGame = gets gameUpdates >>= sequenceA_
+updateGame = do
+    -- Wait for enough ticks
+    waitForTicks
+
+    -- Calculate new tick
+    gs <- get
+    currentTicks <- SDL.ticks
+    let gTicks = gameTicks gs
+        deltaTime = min 0.05 $ fromIntegral (currentTicks - gTicks) / 1000.0 :: Float
+
+    put gs{gameTicks = currentTicks}
+
+    -- Runs updates of all Actors with deltaTime
+    updateActors deltaTime
+  where
+    waitForTicks :: StateT GameState IO ()
+    waitForTicks = do
+        currentTicks <- SDL.ticks
+        gTicks <- gets gameTicks
+        let ticksPassed = currentTicks >= gTicks + 16
+        unless ticksPassed waitForTicks
+
+updateActors :: Float -> StateT GameState IO ()
+updateActors deltaTime = do
+    -- TODO: Implement addition and remotion of actors
+    -- TODO: Set gameUpdatingActors to True
+
+    -- Call update on each actor
+    gets gameUpdates >>= traverse_ ($ deltaTime)
+
+    -- TODO: Set gameUpdatingActors to False
+    -- TODO: filter dead actors from actors list
+    return ()
 
 generateOutput :: GameData -> StateT GameState IO ()
 generateOutput gameData = do

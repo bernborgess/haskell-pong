@@ -9,11 +9,13 @@ where
 
 import Control.Exception (SomeException, catch)
 import Control.Monad.State (StateT, forM_, gets, liftIO, modify)
+import Data.Word (Word32)
 import System.Exit (exitFailure, exitSuccess)
 import System.IO (hPrint, hPutStrLn, stderr)
 
-import Actors.Types (Ball (..), Paddle (..))
 import qualified SDL
+
+import Actors.Types (Ball (..), Paddle (..))
 
 -- | Constant values to setup the game
 data GameData = GameData
@@ -24,10 +26,11 @@ data GameData = GameData
 -- | Mutable values that run the game
 data GameState = GameState
     { gameActions :: [IO ()]
+    , gameTicks :: Word32
     , gameBall :: Ball
     , gamePaddle :: Paddle
     , gameDraws :: [GameData -> StateT GameState IO ()]
-    , gameUpdates :: [StateT GameState IO ()]
+    , gameUpdates :: [Float -> StateT GameState IO ()]
     }
 
 -- | Helper that runs all clean actions

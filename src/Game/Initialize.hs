@@ -1,6 +1,6 @@
 module Game.Initialize (initialize, initialGameState) where
 
-import Control.Monad.State (StateT)
+import Control.Monad.State (MonadState (get), StateT, put)
 
 import qualified SDL
 
@@ -35,12 +35,18 @@ initialize = do
 
     addClean $ putStrLn "Start Cleaning"
 
+    -- Set the initial clock
+    gs <- get
+    ticks <- SDL.ticks
+    put gs{gameTicks = ticks}
+
     return GameData{gameRenderer = renderer, gameWindow = window}
 
 initialGameState :: GameState
 initialGameState =
     GameState
         { gameActions = []
+        , gameTicks = 0
         , gameBall =
             Ball
                 { ballPosition = SDL.V2 100 0
