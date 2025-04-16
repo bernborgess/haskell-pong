@@ -27,7 +27,7 @@ library
 
     build-depends:    base ^>=4.17.2.1,
                       sdl2 ^>=2.5.5.0,
-                      linear,
+                      linear ^>=1.23.1,
                       text^>=1.2.5.0,
                       mtl ^>= 2.2.2,
                       random ^>= 1.2.1.1
@@ -42,7 +42,7 @@ executable haskell-pong
     hs-source-dirs:   app
     build-depends:    base ^>=4.17.2.1,
                       sdl2 ^>=2.5.5.0,
-                      linear,
+                      linear ^>=1.23.1,
                       text^>=1.2.5.0,
                       mtl ^>= 2.2.2,
                       random ^>= 1.2.1.1,
