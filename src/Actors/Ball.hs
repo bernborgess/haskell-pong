@@ -43,19 +43,23 @@ ballUpdate gameData deltaTime = do
     when (newPosX < 0.0) exitClean
 
     let newVelX
+            -- Hit the paddle
             | velX < 0.0
                 && dy <= toEnum (paddleHeight + ballSize) / 2.0
                 && dx == clamp (0.0, toEnum paddleWidth) dx =
                 -velX
+            -- Hit the right wall
             | velX > 0.0
                 && newPosX >= toEnum (fromEnum windowWidth - (ballSize `div` 2)) =
                 -velX
             | otherwise = velX
 
     let newVelY
+            -- Hit the top wall
             | velY < 0.0
                 && newPosY <= toEnum (ballSize `div` 2) =
                 -velY
+            -- Hit the bottom wall
             | velY > 0.0
                 && newPosY >= toEnum (fromEnum windowHeight - (ballSize `div` 2)) =
                 -velY
