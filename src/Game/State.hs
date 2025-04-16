@@ -2,6 +2,9 @@ module Game.State (
     GameData (..),
     GameState (..),
     GameProcedure,
+    ProcessInputProcedure,
+    UpdateProcedure,
+    DrawProcedure,
     addClean,
     exitClean,
     safeRun,
@@ -32,13 +35,17 @@ data GameState = GameState
       gameBall :: Ball
     , gamePaddle :: Paddle
     , -- \* Game Loop Methods
-      gameProcessInputs :: [(SDL.Scancode -> Bool) -> GameProcedure]
-    , gameUpdates :: [GameData -> Float -> GameProcedure]
-    , gameDraws :: [SDL.Renderer -> GameProcedure]
+      gameProcessInputs :: [ProcessInputProcedure]
+    , gameUpdates :: [UpdateProcedure]
+    , gameDraws :: [DrawProcedure]
     }
 
 -- | Type Alias used when mutating game state
 type GameProcedure = StateT GameState IO ()
+
+type ProcessInputProcedure = (SDL.Scancode -> Bool) -> GameProcedure
+type UpdateProcedure = GameData -> Float -> GameProcedure
+type DrawProcedure = SDL.Renderer -> GameProcedure
 
 -- | Helper that runs all clean actions
 exitClean :: GameProcedure

@@ -8,9 +8,9 @@ import Linear (V2 (V2))
 
 import qualified SDL
 
-import Game.State (GameProcedure)
+import Game.State (DrawProcedure)
 
-drawRectangle :: V2 Float -> (Int, Int) -> Maybe (SDL.V4 Word8) -> SDL.Renderer -> GameProcedure
+drawRectangle :: V2 Float -> (Int, Int) -> Maybe (SDL.V4 Word8) -> DrawProcedure
 drawRectangle (V2 posX posY) (width, height) mc renderer = do
     SDL.rendererDrawColor renderer SDL.$= color
     -- \* Create a SDL_Rect rectangle to visually represent the object:

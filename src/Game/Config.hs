@@ -11,7 +11,7 @@ import qualified SDL
 
 -- | Window title displayed in title bar
 windowTitle :: Text
-windowTitle = pack "Window"
+windowTitle = pack "Pong in Haskell"
 
 -- | Initial screen dimensions in pixels
 screenWidth, screenHeight :: CInt

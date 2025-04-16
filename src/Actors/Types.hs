@@ -8,6 +8,7 @@ import qualified SDL
 data Ball = Ball
     { ballPosition :: V2 Float
     , ballSize :: Int
+    , ballVelocity :: V2 Float
     , ballColor :: SDL.V4 Word8
     }
 

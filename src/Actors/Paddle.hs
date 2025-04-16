@@ -14,7 +14,7 @@ import qualified SDL
 
 import Actors.Types (Paddle (..))
 import Components.DrawComponent (drawRectangle)
-import Game.State (GameData (..), GameProcedure, GameState (..))
+import Game.State (DrawProcedure, GameData (..), GameState (..), ProcessInputProcedure, UpdateProcedure)
 
 paddleVerticalSpeed :: Float
 paddleVerticalSpeed = 1000.0
@@ -29,7 +29,7 @@ newPaddle =
         , paddleDirection = 0.0
         }
 
-paddleProcessInput :: (SDL.Scancode -> Bool) -> GameProcedure
+paddleProcessInput :: ProcessInputProcedure
 paddleProcessInput ks = do
     modify $ \gs -> gs{gamePaddle = (gamePaddle gs){paddleDirection = newDirection}}
   where
@@ -38,7 +38,7 @@ paddleProcessInput ks = do
     down = ks SDL.ScancodeDown || ks SDL.ScancodeS
     newDirection | up = -1 | down = 1 | otherwise = 0
 
-paddleUpdate :: GameData -> Float -> GameProcedure
+paddleUpdate :: UpdateProcedure
 paddleUpdate gameData deltaTime = do
     paddle <- gets gamePaddle
     let direction = paddleDirection paddle
@@ -61,7 +61,7 @@ paddleUpdate gameData deltaTime = do
 
         modify $ \gs -> gs{gamePaddle = paddle{paddlePosition = SDL.V2 paddleX newPaddleY}}
 
-paddleDraw :: SDL.Renderer -> GameProcedure
+paddleDraw :: DrawProcedure
 paddleDraw renderer = do
     Paddle{paddlePosition, paddleWidth, paddleHeight, paddleColor} <- gets gamePaddle
     drawRectangle paddlePosition (paddleWidth, paddleHeight) (Just paddleColor) renderer

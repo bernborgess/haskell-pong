@@ -4,7 +4,7 @@ import Control.Monad.State (MonadState (get), StateT, put)
 
 import qualified SDL
 
-import Actors.Ball (ballDraw, newBall)
+import Actors.Ball (ballDraw, ballUpdate, newBall)
 import Actors.Paddle (newPaddle, paddleDraw, paddleProcessInput, paddleUpdate)
 import Game.Config (windowConfig, windowTitle)
 import Game.State (GameData (..), GameState (..), addClean, safeRun)
@@ -51,6 +51,6 @@ initialGameState =
         , gamePaddle = newPaddle
         , -- \* Game Loop Methods
           gameProcessInputs = [paddleProcessInput]
-        , gameUpdates = [paddleUpdate]
+        , gameUpdates = [ballUpdate, paddleUpdate]
         , gameDraws = [ballDraw, paddleDraw]
         }
